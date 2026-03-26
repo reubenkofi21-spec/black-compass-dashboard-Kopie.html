@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Black Compass — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f9f8f5;
+    --border: #e8e6e0;
+    --border2: #d4d0c8;
+    --text: #1a1916;
+    --text2: #6b6860;
+    --text3: #9c9890;
+    --accent: #0a5c52;
+    --accent2: #0e7a6b;
+    --accent3: #12a88f;
+    --accent-light: #e6f5f2;
+    --accent-mid: #b3e0d9;
+    --gold: #c9a84c;
+    --gold-light: #f5edda;
+    --red: #d64545;
+    --red-light: #fde8e8;
+    --green: #2e7d52;
+    --green-light: #e6f4ec;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
+    --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 220px;
+    background: var(--text);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    padding: 0 0 24px 0;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 12px;
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    margin: 2px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.5);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: var(--transition);
+    user-select: none;
+  }
+
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: var(--accent); color: #fff; }
+
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 24px 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.3);
+    font-size: 11px;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 220px;
+    min-height: 100vh;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(245,244,240,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--text);
+  }
+
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  .lang-toggle {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .lang-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    transition: var(--transition);
+    font-family: 'Syne', sans-serif;
+  }
+
+  .lang-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-danger { background: var(--red-light); color: var(--red); border: none; }
+  .btn-danger:hover { background: #fbd5d5; }
+
+  /* CONTENT */
+  .content { padding: 28px 32px 48px; }
+
+  /* SECTION TABS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* GRID */
+  .grid { display: grid; gap: 16px; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    transition: var(--transition);
+  }
+
+  .card:hover { box-shadow: var(--shadow); }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .card-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  .card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+
+  .card-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 6px 0 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .card-sub {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .card-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .change-up { background: var(--green-light); color: var(--green); }
+  .change-down { background: var(--red-light); color: var(--red); }
+  .change-neutral { background: var(--accent-light); color: var(--accent); }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* TABLE */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    font-size: 13.5px;
+  }
+
+  thead th {
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  tbody td {
+    padding: 11px 16px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .editable {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 13.5px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    width: 100%;
+    min-width: 80px;
+    transition: var(--transition);
+    cursor: text;
+  }
+
+  .editable:focus {
+    outline: none;
+    border-color: var(--accent3);
+    background: var(--accent-light);
+  }
+
+  .editable:hover { border-color: var(--border2); }
+
+  /* STATUS BADGES */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  .badge-planned { background: #f0f0ff; color: #5555cc; }
+  .badge-active { background: var(--green-light); color: var(--green); }
+  .badge-completed { background: var(--accent-light); color: var(--accent); }
+
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 6px; }
+  .progress-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .progress-label { font-size: 13px; font-weight: 500; color: var(--text2); }
+  .progress-pct { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
+  .progress-bar-bg { height: 7px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-bar { height: 100%; border-radius: 99px; background: var(--accent3); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+  .progress-sub { font-size: 11.5px; color: var(--text3); margin-top: 4px; }
+
+  /* CHARTS */
+  .chart-container { position: relative; height: 220px; }
+
+  /* FUNNEL */
+  .funnel { display: flex; flex-direction: column; gap: 8px; }
+  .funnel-item { position: relative; }
+  .funnel-bar-row { display: flex; align-items: center; gap: 10px; }
+  .funnel-label { font-size: 12px; font-weight: 500; color: var(--text2); width: 80px; flex-shrink: 0; }
+  .funnel-bar-bg { flex: 1; height: 32px; background: var(--surface2); border-radius: 6px; overflow: hidden; }
+  .funnel-bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 12px; font-size: 12px; font-weight: 600; color: #fff; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+  .funnel-value { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; width: 44px; text-align: right; flex-shrink: 0; }
+
+  /* KPI INPUTS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .kpi-card label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .kpi-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--text);
+    background: var(--bg);
+    transition: var(--transition);
+  }
+  .kpi-input:focus { outline: none; border-color: var(--accent3); background: var(--accent-light); }
+  .kpi-auto {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    padding: 6px 0;
+  }
+
+  /* INFLUENCER TABLE */
+  .perf-score { display: flex; align-items: center; gap: 8px; }
+  .perf-bar { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .perf-fill { height: 100%; border-radius: 99px; }
+  .perf-num { font-size: 12px; font-weight: 600; width: 28px; }
+
+  /* GOALS */
+  .goals-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26,25,22,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: var(--transition);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 28px 28px 24px;
+    width: 500px;
+    max-width: 95vw;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(10px);
+    transition: var(--transition);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 11.5px; font-weight: 600; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+  .form-input {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    transition: var(--transition);
+  }
+  .form-input:focus { outline: none; border-color: var(--accent3); background: var(--accent-light); }
+  .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+  /* BREAKEVEN */
+  .breakeven-bar {
+    display: flex;
+    height: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-top: 10px;
+  }
+  .be-filled { background: var(--accent3); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; transition: width 0.6s ease; }
+  .be-empty { background: var(--border); flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 12px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--text);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    z-index: 999;
+    transform: translateY(10px);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+  /* ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section.active > * {
+    animation: fadeUp 0.35s ease forwards;
+  }
+
+  /* RESPONSIVE TWEAKS */
+  @media (max-width: 1200px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .mt-4 { margin-top: 16px; }
+  .mt-6 { margin-top: 24px; }
+  .gap-4 { gap: 16px; }
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .text-sm { font-size: 12px; }
+  .text-muted { color: var(--text3); }
+  .font-bold { font-weight: 700; font-family: 'Syne', sans-serif; }
+  .w-full { width: 100%; }
+
+  .stat-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .stat-row:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">🧭</div>
+      <div>
+        <div class="logo-text">Black Compass</div>
+        <div class="logo-sub">Dashboard</div>
+      </div>
+    </div>
+  </div>
+
+  <nav id="sidebar-nav">
+    <div class="nav-item active" data-tab="dashboard">
+      <span class="nav-icon">📊</span>
+      <span data-t="nav_dashboard">Dashboard</span>
+    </div>
+    <div class="nav-item" data-tab="trips">
+      <span class="nav-icon">✈️</span>
+      <span data-t="nav_trips">Trips</span>
+    </div>
+    <div class="nav-item" data-tab="marketing">
+      <span class="nav-icon">📣</span>
+      <span data-t="nav_marketing">Marketing</span>
+    </div>
+    <div class="nav-item" data-tab="kpis">
+      <span class="nav-icon">📈</span>
+      <span data-t="nav_kpis">KPIs</span>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div>v1.0 · 2025</div>
+    <div style="margin-top:2px; color:rgba(255,255,255,0.2)">🌍 Ghana Trips</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Overview</div>
+    <div class="topbar-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" onclick="setLang('de')">DE</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="section active" id="tab-dashboard">
+
+      <div class="section-header">
+        <div>
+          <div class="section-title" data-t="overview_title">Business Overview</div>
+          <div class="text-sm text-muted" style="margin-top:2px" data-t="overview_sub">All key metrics at a glance</div>
+        </div>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="grid grid-4" id="kpi-cards">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label" data-t="total_revenue">Total Revenue</div>
+            <div class="card-icon" style="background:var(--accent-light); color:var(--accent)">💰</div>
+          </div>
+          <div class="card-value" id="ov-revenue">—</div>
+          <div class="card-sub"><span class="card-change change-up" id="ov-revenue-change">—</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label" data-t="total_profit">Total Profit</div>
+            <div class="card-icon" style="background:var(--green-light); color:var(--green)">📈</div>
+          </div>
+          <div class="card-value" id="ov-profit">—</div>
+          <div class="card-sub"><span id="ov-margin" class="text-muted text-sm">—</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label" data-t="active_trips">Active Trips</div>
+            <div class="card-icon" style="background:var(--gold-light); color:var(--gold)">🌍</div>
+          </div>
+          <div class="card-value" id="ov-trips">—</div>
+          <div class="card-sub text-muted text-sm" id="ov-trips-sub">—</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-label" data-t="total_participants">Participants</div>
+            <div class="card-icon" style="background:#f0e8ff; color:#7755cc">👥</div>
+          </div>
+          <div class="card-value" id="ov-participants">—</div>
+          <div class="card-sub text-muted text-sm" id="ov-be-status">—</div>
+        </div>
+      </div>
+
+      <!-- GOALS + BREAKEVEN -->
+      <div class="grid grid-2 mt-6">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:16px" data-t="goal_progress">Goal Progress</div>
+          <div style="display:flex;flex-direction:column;gap:18px" id="goals-display"></div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:8px" data-t="breakeven">Break-Even Tracker</div>
+          <div class="text-sm text-muted" id="be-desc" style="margin-bottom:16px">5 participants needed per trip</div>
+          <div id="be-cards" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="grid grid-2 mt-6">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px" data-t="revenue_growth">Revenue Growth</div>
+          <div class="chart-container">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px" data-t="trip_performance">Trip Performance</div>
+          <div class="chart-container">
+            <canvas id="tripChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- FUNNEL -->
+      <div class="card mt-6">
+        <div class="section-title" style="margin-bottom:16px" data-t="conversion_funnel">Conversion Funnel</div>
+        <div class="funnel" id="funnel-display"></div>
+      </div>
+
+    </section>
+
+    <!-- ===== TRIPS ===== -->
+    <section class="section" id="tab-trips">
+      <div class="section-header">
+        <div>
+          <div class="section-title" data-t="trips_title">Trip Management</div>
+          <div class="text-sm text-muted" data-t="trips_sub">Track all your Ghana trips</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('trip')" data-t="add_trip">+ Add Trip</button>
+      </div>
+
+      <!-- TRIP SUMMARY CARDS -->
+      <div class="grid grid-4" id="trip-summary-cards">
+        <div class="card">
+          <div class="card-label" data-t="total_trips">Total Trips</div>
+          <div class="card-value" id="ts-total">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label" data-t="completed">Completed</div>
+          <div class="card-value" id="ts-completed">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label" data-t="total_revenue">Total Revenue</div>
+          <div class="card-value" id="ts-revenue">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label" data-t="avg_profit">Avg. Profit/Trip</div>
+          <div class="card-value" id="ts-avg-profit">—</div>
+        </div>
+      </div>
+
+      <div class="table-wrap mt-6">
+        <table>
+          <thead>
+            <tr>
+              <th data-t="th_trip">Trip</th>
+              <th data-t="th_date">Date</th>
+              <th data-t="th_participants">Participants</th>
+              <th data-t="th_revenue">Revenue (€)</th>
+              <th data-t="th_costs">Costs (€)</th>
+              <th data-t="th_profit">Profit (€)</th>
+              <th data-t="th_status">Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="trips-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== MARKETING ===== -->
+    <section class="section" id="tab-marketing">
+      <div class="section-header">
+        <div>
+          <div class="section-title" data-t="marketing_title">Marketing & Influencers</div>
+          <div class="text-sm text-muted" data-t="marketing_sub">Track influencer performance and campaigns</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('influencer')" data-t="add_influencer">+ Add Influencer</button>
+      </div>
+
+      <div class="grid grid-4" id="mkt-summary-cards">
+        <div class="card">
+          <div class="card-label" data-t="total_reach">Total Reach</div>
+          <div class="card-value" id="ms-reach">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label" data-t="total_clicks">Total Clicks</div>
+          <div class="card-value" id="ms-clicks">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label" data-t="leads_gen">Leads Generated</div>
+          <div class="card-value" id="ms-leads">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label" data-t="mkt_cac">Avg. CAC</div>
+          <div class="card-value" id="ms-cac">—</div>
+        </div>
+      </div>
+
+      <div class="table-wrap mt-6">
+        <table>
+          <thead>
+            <tr>
+              <th data-t="th_influencer">Influencer</th>
+              <th data-t="th_platform">Platform</th>
+              <th data-t="th_views">Views</th>
+              <th data-t="th_clicks">Clicks</th>
+              <th data-t="th_leads">Leads</th>
+              <th data-t="th_bookings">Bookings</th>
+              <th data-t="th_spend">Spend (€)</th>
+              <th data-t="th_performance">Performance</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="influencers-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== KPIs ===== -->
+    <section class="section" id="tab-kpis">
+      <div class="section-header">
+        <div>
+          <div class="section-title" data-t="kpis_title">KPI Tracker</div>
+          <div class="text-sm text-muted" data-t="kpis_sub">Edit all values directly</div>
+        </div>
+        <button class="btn btn-ghost" onclick="saveToast()" data-t="save_changes">💾 Save</button>
+      </div>
+
+      <!-- FUNNEL INPUTS -->
+      <div class="card">
+        <div class="section-title" style="margin-bottom:16px" data-t="funnel_metrics">Funnel Metrics</div>
+        <div class="kpi-grid" id="funnel-inputs"></div>
+      </div>
+
+      <!-- MARKETING INPUTS -->
+      <div class="card mt-6">
+        <div class="section-title" style="margin-bottom:16px" data-t="marketing_spend">Marketing Spend & CAC</div>
+        <div class="kpi-grid" id="marketing-inputs"></div>
+      </div>
+
+      <!-- GOALS INPUTS -->
+      <div class="card mt-6">
+        <div class="section-title" style="margin-bottom:16px" data-t="monthly_goals">Monthly Goals</div>
+        <div class="kpi-grid" id="goals-inputs"></div>
+      </div>
+
+      <!-- UNIT ECONOMICS -->
+      <div class="card mt-6">
+        <div class="section-title" style="margin-bottom:16px" data-t="unit_economics">Unit Economics</div>
+        <div class="kpi-grid" id="unit-inputs"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="trip-modal">
+  <div class="modal">
+    <div class="modal-title" data-t="add_trip_title">Add New Trip</div>
+    <div class="form-row">
+      <div class="form-group full">
+        <label class="form-label" data-t="trip_name">Trip Name</label>
+        <input class="form-input" id="f-trip-name" placeholder="e.g. Ghana Cultural Immersion">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_date">Date</label>
+        <input class="form-input" id="f-trip-date" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_participants">Participants</label>
+        <input class="form-input" id="f-trip-pax" type="number" placeholder="12">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_revenue">Revenue (€)</label>
+        <input class="form-input" id="f-trip-rev" type="number" placeholder="28800">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_costs">Costs (€)</label>
+        <input class="form-input" id="f-trip-cost" type="number" placeholder="16080">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_status">Status</label>
+        <select class="form-input" id="f-trip-status">
+          <option value="planned">Planned</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('trip')" data-t="cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="addTrip()" data-t="add_trip">Add Trip</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="influencer-modal">
+  <div class="modal">
+    <div class="modal-title" data-t="add_influencer_title">Add Influencer</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" data-t="th_influencer">Name</label>
+        <input class="form-input" id="f-inf-name" placeholder="@handle">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_platform">Platform</label>
+        <select class="form-input" id="f-inf-platform">
+          <option>Instagram</option>
+          <option>TikTok</option>
+          <option>YouTube</option>
+          <option>Twitter/X</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_views">Views</label>
+        <input class="form-input" id="f-inf-views" type="number" placeholder="50000">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_clicks">Clicks</label>
+        <input class="form-input" id="f-inf-clicks" type="number" placeholder="2000">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_leads">Leads</label>
+        <input class="form-input" id="f-inf-leads" type="number" placeholder="80">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-t="th_bookings">Bookings</label>
+        <input class="form-input" id="f-inf-bookings" type="number" placeholder="5">
+      </div>
+      <div class="form-group full">
+        <label class="form-label" data-t="th_spend">Spend (€)</label>
+        <input class="form-input" id="f-inf-spend" type="number" placeholder="500">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('influencer')" data-t="cancel">Cancel</button>
+      <button class="btn btn-primary" onclick="addInfluencer()" data-t="add_influencer">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// TRANSLATIONS
+// ============================================================
+const T = {
+  en: {
+    nav_dashboard: "Dashboard", nav_trips: "Trips", nav_marketing: "Marketing", nav_kpis: "KPIs",
+    overview_title: "Business Overview", overview_sub: "All key metrics at a glance",
+    total_revenue: "Total Revenue", total_profit: "Total Profit", active_trips: "Active Trips",
+    total_participants: "Total Participants", goal_progress: "Goal Progress",
+    breakeven: "Break-Even Tracker", revenue_growth: "Revenue Growth",
+    trip_performance: "Trip Performance", conversion_funnel: "Conversion Funnel",
+    trips_title: "Trip Management", trips_sub: "Track all your Ghana trips",
+    add_trip: "+ Add Trip", add_trip_title: "Add New Trip",
+    total_trips: "Total Trips", completed: "Completed",
+    avg_profit: "Avg. Profit / Trip",
+    th_trip: "Trip", th_date: "Date", th_participants: "Participants",
+    th_revenue: "Revenue (€)", th_costs: "Costs (€)", th_profit: "Profit (€)",
+    th_status: "Status", trip_name: "Trip Name",
+    marketing_title: "Marketing & Influencers", marketing_sub: "Track influencer performance",
+    add_influencer: "+ Add Influencer", add_influencer_title: "Add Influencer",
+    total_reach: "Total Reach", total_clicks: "Total Clicks",
+    leads_gen: "Leads Generated", mkt_cac: "Avg. CAC",
+    th_influencer: "Influencer", th_platform: "Platform",
+    th_views: "Views", th_clicks: "Clicks", th_leads: "Leads",
+    th_bookings: "Bookings", th_spend: "Spend (€)", th_performance: "Performance",
+    kpis_title: "KPI Tracker", kpis_sub: "Edit all values directly",
+    save_changes: "💾 Save", funnel_metrics: "Funnel Metrics",
+    marketing_spend: "Marketing Spend & CAC", monthly_goals: "Monthly Goals",
+    unit_economics: "Unit Economics", cancel: "Cancel",
+    status_planned: "Planned", status_active: "Active", status_completed: "Completed",
+    be_trip: "Trip", be_of: "of", be_needed: "participants needed",
+    margin_label: "margin", participants_label: "participants",
+    topbar_dashboard: "Overview", topbar_trips: "Trip Management",
+    topbar_marketing: "Marketing", topbar_kpis: "KPI Tracker",
+    kpi_leads: "Leads", kpi_bookings: "Bookings", kpi_conversion: "Conversion Rate",
+    kpi_mktspend: "Marketing Spend (€)", kpi_cac: "CAC (€)",
+    goal_revenue: "Revenue Goal (€)", goal_trips: "Trips Goal", goal_pax: "Participants Goal",
+    unit_rev_per_cust: "Revenue / Customer (€)", unit_cost_per_cust: "Cost / Customer (€)",
+    unit_profit_per_cust: "Profit / Customer (€)", unit_breakeven: "Break-Even (customers)",
+    saved_toast: "✓ Changes saved",
+  },
+  de: {
+    nav_dashboard: "Dashboard", nav_trips: "Reisen", nav_marketing: "Marketing", nav_kpis: "KPIs",
+    overview_title: "Unternehmensübersicht", overview_sub: "Alle wichtigen Kennzahlen auf einen Blick",
+    total_revenue: "Gesamtumsatz", total_profit: "Gesamtgewinn", active_trips: "Aktive Reisen",
+    total_participants: "Gesamtteilnehmer", goal_progress: "Zielfortschritt",
+    breakeven: "Break-Even Tracker", revenue_growth: "Umsatzwachstum",
+    trip_performance: "Reise-Performance", conversion_funnel: "Conversion Funnel",
+    trips_title: "Reiseverwaltung", trips_sub: "Alle Ghana-Reisen im Überblick",
+    add_trip: "+ Reise hinzufügen", add_trip_title: "Neue Reise hinzufügen",
+    total_trips: "Reisen gesamt", completed: "Abgeschlossen",
+    avg_profit: "Ø Gewinn / Reise",
+    th_trip: "Reise", th_date: "Datum", th_participants: "Teilnehmer",
+    th_revenue: "Umsatz (€)", th_costs: "Kosten (€)", th_profit: "Gewinn (€)",
+    th_status: "Status", trip_name: "Reisename",
+    marketing_title: "Marketing & Influencer", marketing_sub: "Influencer-Performance tracken",
+    add_influencer: "+ Influencer hinzufügen", add_influencer_title: "Influencer hinzufügen",
+    total_reach: "Gesamtreichweite", total_clicks: "Gesamtklicks",
+    leads_gen: "Generierte Leads", mkt_cac: "Ø CAC",
+    th_influencer: "Influencer", th_platform: "Plattform",
+    th_views: "Views", th_clicks: "Klicks", th_leads: "Leads",
+    th_bookings: "Buchungen", th_spend: "Ausgaben (€)", th_performance: "Performance",
+    kpis_title: "KPI Tracker", kpis_sub: "Alle Werte direkt bearbeiten",
+    save_changes: "💾 Speichern", funnel_metrics: "Funnel-Kennzahlen",
+    marketing_spend: "Marketingausgaben & CAC", monthly_goals: "Monatliche Ziele",
+    unit_economics: "Einheitsökonomie", cancel: "Abbrechen",
+    status_planned: "Geplant", status_active: "Aktiv", status_completed: "Abgeschlossen",
+    be_trip: "Reise", be_of: "von", be_needed: "Teilnehmer benötigt",
+    margin_label: "Marge", participants_label: "Teilnehmer",
+    topbar_dashboard: "Übersicht", topbar_trips: "Reiseverwaltung",
+    topbar_marketing: "Marketing", topbar_kpis: "KPI Tracker",
+    kpi_leads: "Leads", kpi_bookings: "Buchungen", kpi_conversion: "Conversion Rate",
+    kpi_mktspend: "Marketingausgaben (€)", kpi_cac: "CAC (€)",
+    goal_revenue: "Umsatzziel (€)", goal_trips: "Reiseziel", goal_pax: "Teilnehmerziel",
+    unit_rev_per_cust: "Umsatz / Kunde (€)", unit_cost_per_cust: "Kosten / Kunde (€)",
+    unit_profit_per_cust: "Gewinn / Kunde (€)", unit_breakeven: "Break-Even (Kunden)",
+    saved_toast: "✓ Änderungen gespeichert",
+  }
+};
+
+let lang = 'en';
+
+function t(key) { return T[lang][key] || T['en'][key] || key; }
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === l.toUpperCase()));
+  document.querySelectorAll('[data-t]').forEach(el => {
+    el.textContent = t(el.dataset.t);
+  });
+  updateTopbarTitle();
+  renderAll();
+  localStorage.setItem('bc_lang', l);
+}
+
+// ============================================================
+// DEFAULT DATA
+// ============================================================
+const defaultData = {
+  trips: [
+    { id: 1, name: "Ghana Roots Experience", date: "2025-03-15", pax: 12, revenue: 30000, costs: 16080, status: "completed" },
+    { id: 2, name: "Accra Immersion", date: "2025-05-20", pax: 10, revenue: 25000, costs: 13400, status: "active" },
+    { id: 3, name: "Cape Coast Heritage", date: "2025-08-10", pax: 8, revenue: 20400, costs: 10720, status: "planned" },
+  ],
+  influencers: [
+    { id: 1, name: "@wanderlust.king", platform: "Instagram", views: 85000, clicks: 3200, leads: 95, bookings: 8, spend: 600 },
+    { id: 2, name: "@travelwithzara", platform: "TikTok", views: 120000, clicks: 5500, leads: 150, bookings: 12, spend: 800 },
+    { id: 3, name: "@afrodiaspora", platform: "YouTube", views: 45000, clicks: 1800, leads: 60, bookings: 5, spend: 400 },
+  ],
+  kpis: {
+    leads: 305,
+    bookings: 25,
+    mkt_spend: 1800,
+  },
+  goals: {
+    revenue: 120000,
+    trips: 6,
+    pax: 60,
+  },
+  unit: {
+    rev_per_cust: 2550,
+    cost_per_cust: 1340,
+    breakeven: 5,
+  },
+  nextId: 10,
+};
+
+function loadData() {
+  try {
+    const s = localStorage.getItem('bc_data');
+    return s ? JSON.parse(s) : defaultData;
+  } catch(e) { return defaultData; }
+}
+
+function saveData() {
+  localStorage.setItem('bc_data', JSON.stringify(state));
+}
+
+let state = loadData();
+
+// ============================================================
+// HELPERS
+// ============================================================
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+  return n;
+}
+
+function fmtEur(n) { return '€' + Number(n).toLocaleString('de-DE'); }
+
+function pct(a, b) { return b ? Math.round(a/b*100) : 0; }
+
+function perfScore(inf) {
+  const ctr = inf.views > 0 ? inf.clicks/inf.views : 0;
+  const cvr = inf.clicks > 0 ? inf.leads/inf.clicks : 0;
+  const bookRate = inf.leads > 0 ? inf.bookings/inf.leads : 0;
+  return Math.min(100, Math.round((ctr*100 + cvr*100 + bookRate*200) * 5));
+}
+
+function statusBadge(s) {
+  const cls = { planned: 'badge-planned', active: 'badge-active', completed: 'badge-completed' };
+  const label = { planned: t('status_planned'), active: t('status_active'), completed: t('status_completed') };
+  return `<span class="badge ${cls[s]}">${label[s]||s}</span>`;
+}
+
+function perfColor(score) {
+  if (score >= 70) return 'var(--green)';
+  if (score >= 40) return 'var(--gold)';
+  return 'var(--red)';
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+let revenueChartInst, tripChartInst;
+
+function renderCharts() {
+  const trips = state.trips;
+
+  // Revenue line
+  const labels = trips.map(t => t.name.split(' ').slice(0,2).join(' '));
+  const revData = trips.map(t => t.revenue);
+  const profData = trips.map(t => t.revenue - t.costs);
+
+  if (revenueChartInst) revenueChartInst.destroy();
+  const rCtx = document.getElementById('revenueChart').getContext('2d');
+  const gradR = rCtx.createLinearGradient(0,0,0,220);
+  gradR.addColorStop(0, 'rgba(18,168,143,0.15)');
+  gradR.addColorStop(1, 'rgba(18,168,143,0)');
+  const gradP = rCtx.createLinearGradient(0,0,0,220);
+  gradP.addColorStop(0, 'rgba(46,125,82,0.12)');
+  gradP.addColorStop(1, 'rgba(46,125,82,0)');
+
+  revenueChartInst = new Chart(rCtx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: t('total_revenue'), data: revData, borderColor: 'var(--accent3)', backgroundColor: gradR, tension: 0.4, fill: true, pointBackgroundColor: 'var(--accent3)', pointRadius: 5, borderWidth: 2 },
+        { label: t('total_profit'), data: profData, borderColor: 'var(--green)', backgroundColor: gradP, tension: 0.4, fill: true, pointBackgroundColor: 'var(--green)', pointRadius: 5, borderWidth: 2 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: 'DM Sans' }, boxWidth: 10 } } }, scales: { y: { grid: { color: 'var(--border)' }, ticks: { callback: v => '€'+fmt(v), font: { family: 'DM Sans' } } }, x: { grid: { display: false }, ticks: { font: { family: 'DM Sans' } } } } }
+  });
+
+  // Trip bar
+  if (tripChartInst) tripChartInst.destroy();
+  const tCtx = document.getElementById('tripChart').getContext('2d');
+  tripChartInst = new Chart(tCtx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: t('th_revenue'), data: revData, backgroundColor: 'rgba(18,168,143,0.7)', borderRadius: 6 },
+        { label: t('th_costs'), data: trips.map(t => t.costs), backgroundColor: 'rgba(214,69,69,0.5)', borderRadius: 6 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: 'DM Sans' }, boxWidth: 10 } } }, scales: { y: { grid: { color: 'var(--border)' }, ticks: { callback: v => '€'+fmt(v), font: { family: 'DM Sans' } } }, x: { grid: { display: false }, ticks: { font: { family: 'DM Sans' } } } } }
+  });
+}
+
+// ============================================================
+// RENDER DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const trips = state.trips;
+  const totalRev = trips.reduce((s,t) => s + +t.revenue, 0);
+  const totalCost = trips.reduce((s,t) => s + +t.costs, 0);
+  const totalProfit = totalRev - totalCost;
+  const totalPax = trips.reduce((s,t) => s + +t.pax, 0);
+  const activeTrips = trips.filter(t => t.status === 'active').length;
+  const margin = totalRev > 0 ? Math.round(totalProfit/totalRev*100) : 0;
+
+  document.getElementById('ov-revenue').textContent = fmtEur(totalRev);
+  document.getElementById('ov-revenue-change').textContent = `+${pct(totalRev, state.goals.revenue)}% ${t('goal_revenue').split(' ')[0].toLowerCase()}`;
+  document.getElementById('ov-profit').textContent = fmtEur(totalProfit);
+  document.getElementById('ov-margin').textContent = `${margin}% ${t('margin_label')}`;
+  document.getElementById('ov-trips').textContent = activeTrips;
+  document.getElementById('ov-trips-sub').textContent = `${trips.length} ${t('total_trips').toLowerCase()}`;
+  document.getElementById('ov-participants').textContent = totalPax;
+  document.getElementById('ov-be-status').textContent = `${t('breakeven')}: ${state.unit.breakeven} ${t('th_participants').toLowerCase()}`;
+
+  // GOALS
+  const g = state.goals;
+  const goalsHtml = [
+    { key: 'revenue', label: t('goal_revenue'), cur: totalRev, goal: +g.revenue, fmt: fmtEur },
+    { key: 'trips', label: t('goal_trips'), cur: trips.length, goal: +g.trips, fmt: v=>v },
+    { key: 'pax', label: t('goal_pax'), cur: totalPax, goal: +g.pax, fmt: v=>v },
+  ].map(item => {
+    const p = Math.min(100, pct(item.cur, item.goal));
+    const barColor = p >= 100 ? 'var(--green)' : p >= 60 ? 'var(--accent3)' : 'var(--gold)';
+    return `<div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">${item.label}</span>
+        <span class="progress-pct">${p}%</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar" style="width:${p}%;background:${barColor}"></div></div>
+      <div class="progress-sub">${item.fmt(item.cur)} / ${item.fmt(item.goal)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('goals-display').innerHTML = goalsHtml;
+
+  // BREAKEVEN
+  const be = state.unit.breakeven;
+  const beHtml = trips.map(trip => {
+    const paxPct = Math.min(100, pct(+trip.pax, be));
+    const met = +trip.pax >= be;
+    return `<div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+        <span style="font-weight:500">${trip.name}</span>
+        <span class="${met ? 'change-up card-change' : 'change-neutral card-change'}">${trip.pax} ${t('be_of')} ${be}</span>
+      </div>
+      <div class="breakeven-bar">
+        <div class="be-filled" style="width:${paxPct}%">${paxPct >= 30 ? trip.pax + ' pax' : ''}</div>
+        ${!met ? `<div class="be-empty">${be - trip.pax} more</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('be-cards').innerHTML = beHtml || '<div class="text-sm text-muted">No trips yet</div>';
+
+  // FUNNEL
+  const kpis = state.kpis;
+  const bookings = +kpis.bookings;
+  const leads = +kpis.leads;
+  const visitors = Math.round(leads / 0.08);
+  const funnelData = [
+    { label: 'Visitors', val: visitors, color: 'var(--accent2)' },
+    { label: 'Leads', val: leads, color: 'var(--accent3)' },
+    { label: 'Bookings', val: bookings, color: 'var(--green)' },
+  ];
+  const maxVal = funnelData[0].val || 1;
+  const funnelHtml = funnelData.map(f => `
+    <div class="funnel-item">
+      <div class="funnel-bar-row">
+        <div class="funnel-label">${f.label}</div>
+        <div class="funnel-bar-bg">
+          <div class="funnel-bar-fill" style="width:${Math.max(8,pct(f.val,maxVal))}%;background:${f.color}">
+            ${pct(f.val,maxVal) > 20 ? f.val : ''}
+          </div>
+        </div>
+        <div class="funnel-value">${fmt(f.val)}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('funnel-display').innerHTML = funnelHtml;
+
+  renderCharts();
+}
+
+// ============================================================
+// RENDER TRIPS
+// ============================================================
+function renderTrips() {
+  const trips = state.trips;
+  const totalRev = trips.reduce((s,t) => s + +t.revenue, 0);
+  const totalProfit = trips.reduce((s,t) => s + (+t.revenue - +t.costs), 0);
+  const completed = trips.filter(t => t.status === 'completed').length;
+
+  document.getElementById('ts-total').textContent = trips.length;
+  document.getElementById('ts-completed').textContent = completed;
+  document.getElementById('ts-revenue').textContent = fmtEur(totalRev);
+  document.getElementById('ts-avg-profit').textContent = trips.length ? fmtEur(Math.round(totalProfit / trips.length)) : '—';
+
+  const tbody = document.getElementById('trips-tbody');
+  tbody.innerHTML = trips.map((trip, idx) => {
+    const profit = +trip.revenue - +trip.costs;
+    return `<tr>
+      <td><input class="editable" value="${trip.name}" onchange="updateTrip(${idx},'name',this.value)" style="min-width:160px"></td>
+      <td><input class="editable" type="date" value="${trip.date}" onchange="updateTrip(${idx},'date',this.value)"></td>
+      <td><input class="editable" type="number" value="${trip.pax}" onchange="updateTrip(${idx},'pax',this.value)" style="min-width:70px"></td>
+      <td><input class="editable" type="number" value="${trip.revenue}" onchange="updateTrip(${idx},'revenue',this.value)"></td>
+      <td><input class="editable" type="number" value="${trip.costs}" onchange="updateTrip(${idx},'costs',this.value)"></td>
+      <td style="font-weight:600;color:${profit>=0?'var(--green)':'var(--red)'}">${fmtEur(profit)}</td>
+      <td>
+        <select class="editable" onchange="updateTrip(${idx},'status',this.value)">
+          <option value="planned" ${trip.status==='planned'?'selected':''}>${t('status_planned')}</option>
+          <option value="active" ${trip.status==='active'?'selected':''}>${t('status_active')}</option>
+          <option value="completed" ${trip.status==='completed'?'selected':''}>${t('status_completed')}</option>
+        </select>
+      </td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteTrip(${idx})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateTrip(idx, key, val) {
+  state.trips[idx][key] = val;
+  saveData();
+  renderDashboard();
+  renderTrips();
+}
+
+function deleteTrip(idx) {
+  state.trips.splice(idx, 1);
+  saveData();
+  renderAll();
+}
+
+function addTrip() {
+  const name = document.getElementById('f-trip-name').value.trim();
+  if (!name) return;
+  state.trips.push({
+    id: state.nextId++,
+    name,
+    date: document.getElementById('f-trip-date').value || new Date().toISOString().slice(0,10),
+    pax: +document.getElementById('f-trip-pax').value || 0,
+    revenue: +document.getElementById('f-trip-rev').value || 0,
+    costs: +document.getElementById('f-trip-cost').value || 0,
+    status: document.getElementById('f-trip-status').value,
+  });
+  saveData();
+  closeModal('trip');
+  renderAll();
+  showToast(t('saved_toast'));
+}
+
+// ============================================================
+// RENDER MARKETING
+// ============================================================
+function renderMarketing() {
+  const infs = state.influencers;
+  const totalReach = infs.reduce((s,i) => s + +i.views, 0);
+  const totalClicks = infs.reduce((s,i) => s + +i.clicks, 0);
+  const totalLeads = infs.reduce((s,i) => s + +i.leads, 0);
+  const totalSpend = infs.reduce((s,i) => s + +i.spend, 0);
+  const totalBookings = infs.reduce((s,i) => s + +i.bookings, 0);
+  const cac = totalBookings > 0 ? Math.round(totalSpend / totalBookings) : 0;
+
+  document.getElementById('ms-reach').textContent = fmt(totalReach);
+  document.getElementById('ms-clicks').textContent = fmt(totalClicks);
+  document.getElementById('ms-leads').textContent = fmt(totalLeads);
+  document.getElementById('ms-cac').textContent = fmtEur(cac);
+
+  const tbody = document.getElementById('influencers-tbody');
+  tbody.innerHTML = infs.map((inf, idx) => {
+    const score = perfScore(inf);
+    const color = perfColor(score);
+    return `<tr>
+      <td style="font-weight:600">${inf.name}</td>
+      <td><span class="badge" style="background:var(--accent-light);color:var(--accent)">${inf.platform}</span></td>
+      <td><input class="editable" type="number" value="${inf.views}" onchange="updateInf(${idx},'views',this.value)"></td>
+      <td><input class="editable" type="number" value="${inf.clicks}" onchange="updateInf(${idx},'clicks',this.value)"></td>
+      <td><input class="editable" type="number" value="${inf.leads}" onchange="updateInf(${idx},'leads',this.value)"></td>
+      <td><input class="editable" type="number" value="${inf.bookings}" onchange="updateInf(${idx},'bookings',this.value)"></td>
+      <td><input class="editable" type="number" value="${inf.spend}" onchange="updateInf(${idx},'spend',this.value)"></td>
+      <td>
+        <div class="perf-score">
+          <div class="perf-bar"><div class="perf-fill" style="width:${score}%;background:${color}"></div></div>
+          <div class="perf-num" style="color:${color}">${score}</div>
+        </div>
+      </td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteInf(${idx})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateInf(idx, key, val) {
+  state.influencers[idx][key] = +val;
+  saveData();
+  renderMarketing();
+}
+
+function deleteInf(idx) {
+  state.influencers.splice(idx, 1);
+  saveData();
+  renderMarketing();
+}
+
+function addInfluencer() {
+  const name = document.getElementById('f-inf-name').value.trim();
+  if (!name) return;
+  state.influencers.push({
+    id: state.nextId++,
+    name,
+    platform: document.getElementById('f-inf-platform').value,
+    views: +document.getElementById('f-inf-views').value || 0,
+    clicks: +document.getElementById('f-inf-clicks').value || 0,
+    leads: +document.getElementById('f-inf-leads').value || 0,
+    bookings: +document.getElementById('f-inf-bookings').value || 0,
+    spend: +document.getElementById('f-inf-spend').value || 0,
+  });
+  saveData();
+  closeModal('influencer');
+  renderMarketing();
+  showToast(t('saved_toast'));
+}
+
+// ============================================================
+// RENDER KPIs
+// ============================================================
+function renderKPIs() {
+  const k = state.kpis;
+  const g = state.goals;
+  const u = state.unit;
+  const cvr = k.leads > 0 ? ((k.bookings / k.leads) * 100).toFixed(1) + '%' : '0%';
+  const cac = k.bookings > 0 ? Math.round(k.mkt_spend / k.bookings) : 0;
+  const profitPerCust = u.rev_per_cust - u.cost_per_cust;
+
+  // FUNNEL INPUTS
+  document.getElementById('funnel-inputs').innerHTML = `
+    <div class="kpi-card">
+      <label>${t('kpi_leads')}</label>
+      <input class="kpi-input" type="number" value="${k.leads}" onchange="state.kpis.leads=+this.value;saveData();renderAll()">
+    </div>
+    <div class="kpi-card">
+      <label>${t('kpi_bookings')}</label>
+      <input class="kpi-input" type="number" value="${k.bookings}" onchange="state.kpis.bookings=+this.value;saveData();renderAll()">
+    </div>
+    <div class="kpi-card">
+      <label>${t('kpi_conversion')}</label>
+      <div class="kpi-auto">${cvr}</div>
+    </div>
+  `;
+
+  // MARKETING INPUTS
+  document.getElementById('marketing-inputs').innerHTML = `
+    <div class="kpi-card">
+      <label>${t('kpi_mktspend')}</label>
+      <input class="kpi-input" type="number" value="${k.mkt_spend}" onchange="state.kpis.mkt_spend=+this.value;saveData();renderAll()">
+    </div>
+    <div class="kpi-card">
+      <label>${t('kpi_cac')}</label>
+      <div class="kpi-auto">${fmtEur(cac)}</div>
+    </div>
+    <div class="kpi-card" style="opacity:0.5">
+      <label>—</label>
+      <div class="kpi-auto" style="font-size:13px;color:var(--text3)">Auto</div>
+    </div>
+  `;
+
+  // GOALS INPUTS
+  document.getElementById('goals-inputs').innerHTML = `
+    <div class="kpi-card">
+      <label>${t('goal_revenue')}</label>
+      <input class="kpi-input" type="number" value="${g.revenue}" onchange="state.goals.revenue=+this.value;saveData();renderAll()">
+    </div>
+    <div class="kpi-card">
+      <label>${t('goal_trips')}</label>
+      <input class="kpi-input" type="number" value="${g.trips}" onchange="state.goals.trips=+this.value;saveData();renderAll()">
+    </div>
+    <div class="kpi-card">
+      <label>${t('goal_pax')}</label>
+      <input class="kpi-input" type="number" value="${g.pax}" onchange="state.goals.pax=+this.value;saveData();renderAll()">
+    </div>
+  `;
+
+  // UNIT ECONOMICS
+  document.getElementById('unit-inputs').innerHTML = `
+    <div class="kpi-card">
+      <label>${t('unit_rev_per_cust')}</label>
+      <input class="kpi-input" type="number" value="${u.rev_per_cust}" onchange="state.unit.rev_per_cust=+this.value;saveData();renderAll()">
+    </div>
+    <div class="kpi-card">
+      <label>${t('unit_cost_per_cust')}</label>
+      <input class="kpi-input" type="number" value="${u.cost_per_cust}" onchange="state.unit.cost_per_cust=+this.value;saveData();renderAll()">
+    </div>
+    <div class="kpi-card">
+      <label>${t('unit_profit_per_cust')}</label>
+      <div class="kpi-auto" style="color:var(--green)">${fmtEur(profitPerCust)}</div>
+    </div>
+    <div class="kpi-card">
+      <label>${t('unit_breakeven')}</label>
+      <input class="kpi-input" type="number" value="${u.breakeven}" onchange="state.unit.breakeven=+this.value;saveData();renderAll()">
+    </div>
+  `;
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const tabTitles = { dashboard: 'topbar_dashboard', trips: 'topbar_trips', marketing: 'topbar_marketing', kpis: 'topbar_kpis' };
+let currentTab = 'dashboard';
+
+function updateTopbarTitle() {
+  document.getElementById('topbar-title').textContent = t(tabTitles[currentTab]);
+}
+
+document.getElementById('sidebar-nav').addEventListener('click', e => {
+  const item = e.target.closest('.nav-item');
+  if (!item) return;
+  const tab = item.dataset.tab;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  item.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  currentTab = tab;
+  updateTopbarTitle();
+});
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(type) {
+  document.getElementById(type + '-modal').classList.add('open');
+}
+
+function closeModal(type) {
+  document.getElementById(type + '-modal').classList.remove('open');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function saveToast() { saveData(); showToast(t('saved_toast')); }
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll() {
+  renderDashboard();
+  renderTrips();
+  renderMarketing();
+  renderKPIs();
+  // Re-apply translations
+  document.querySelectorAll('[data-t]').forEach(el => {
+    el.textContent = t(el.dataset.t);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+(function init() {
+  const savedLang = localStorage.getItem('bc_lang') || 'en';
+  lang = savedLang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === lang.toUpperCase()));
+  renderAll();
+  updateTopbarTitle();
+})();
+</script>
+</body>
+</html>
